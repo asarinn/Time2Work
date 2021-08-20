@@ -25,29 +25,44 @@ class MainWindow(QMainWindow):
         for i in range(self.ui.time_entry_table.rowCount()):
             try:
                 unfinished = True
+
                 for j in range(self.ui.time_entry_table.columnCount()):
-                    print(j, self.ui.time_entry_table.item(i, j).text())
-                    if j%2 == 0: # Even numbers
-                        worked_minutes -= self.get_minutes(self.ui.time_entry_table.item(i, j).text())
-                        unfinished = False
-                    else:
-                        worked_minutes += self.get_minutes(self.ui.time_entry_table.item(i, j).text())
-                        unfinished = False
+                    # print(j, self.ui.time_entry_table.item(i, j).text())
+                    if j%2 == 0:  # Even numbers
+                        temp_worked_minutes = self.get_minutes(self.ui.time_entry_table.item(i, j+1).text()) - self.get_minutes(self.ui.time_entry_table.item(i, j).text())
+                        if temp_worked_minutes > 0:
+                            worked_minutes += temp_worked_minutes
+                            unfinished = False
+
             except:
                 if unfinished and i < 5:
                     unfinished_days += 1
 
         remaining_minutes = self.MINUTES_REQUIRED - worked_minutes
-        hours = int(remaining_minutes/60)
-        minutes = int(remaining_minutes % 60)
+        hours = int(abs(remaining_minutes)/60)
+        minutes = int(abs(remaining_minutes) - 60 * hours)
+
+        # FLip sign only once if negative
+        if remaining_minutes < 0:
+            hours = -hours
+
+        if minutes < 10:
+            minutes = f'0{minutes}'
 
         try:
             remaining_minutes_per_day = remaining_minutes/unfinished_days
-            hours_per_day = int(remaining_minutes_per_day/60)
-            minutes_per_day = int(remaining_minutes_per_day % 60)
+            hours_per_day = int(abs(remaining_minutes_per_day)/60)
+            minutes_per_day = int(abs(remaining_minutes_per_day) - 60 * hours_per_day)
         except ZeroDivisionError:
+            remaining_minutes_per_day = 0
             hours_per_day = 0
             minutes_per_day = 0
+
+        if remaining_minutes_per_day < 0:
+            hours_per_day = -hours_per_day
+
+        if minutes_per_day < 10:
+            minutes_per_day = f'0{minutes_per_day}'
 
         self.ui.time_left_label.setText(f'Time left this week: {hours}:{minutes}')
         self.ui.time_left_per_day_label.setText(f'Time left per remaining weekday: {hours_per_day}:{minutes_per_day}')
