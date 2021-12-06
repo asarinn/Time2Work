@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox, QFileDialog
 
 from common import get_config_path
 from common.qt import display_message, set_widget_value, load_from_json_gz, save_to_json_gz, get_widget_info
@@ -22,6 +22,9 @@ class WeeklyTimeTracker:
 
         self.main_window = MainWindow()
 
+        self.main_window.ui.actionSave.triggered.connect(self.manual_save_settings)
+        self.main_window.ui.actionLoad.triggered.connect(self.manual_load_settings)
+
         self.main_window.destroyed.connect(self.save_settings)
         self.load_settings()
 
@@ -35,12 +38,21 @@ class WeeklyTimeTracker:
             'main_window': [get_widget_info(w) for w in main_window_widgets],
         }
 
+    def manual_save_settings(self):
+        path, type = QFileDialog.getSaveFileName()
+        file_name = path.split('/')[-1]
+        save_to_json_gz(self.get_settings(), CONFIG_DIRECTORY, file_name)
+
     def save_settings(self):
         file_name = 'time_tracker_auto_save.gz'
         save_to_json_gz(self.get_settings(), CONFIG_DIRECTORY, file_name)
 
-    def load_settings(self):
-        file_name = 'time_tracker_auto_save.gz'
+    def manual_load_settings(self):
+        path, type = QFileDialog.getOpenFileName()
+        file_name = path.split('/')[-1]
+        self.load_settings(file_name)
+
+    def load_settings(self, file_name='time_tracker_auto_save.gz'):
         try:
             # Get settings from file
             settings = load_from_json_gz(CONFIG_DIRECTORY, file_name)

@@ -35,8 +35,10 @@ class MainWindow(QMainWindow):
                             unfinished = False
 
             except:
+                print(f' i={i} ')
                 if unfinished and i < 5:
                     unfinished_days += 1
+                print(f' unfinished_days={unfinished_days}')
 
         remaining_minutes = self.MINUTES_REQUIRED - worked_minutes
         hours = int(abs(remaining_minutes)/60)
@@ -44,7 +46,9 @@ class MainWindow(QMainWindow):
 
         # FLip sign only once if negative
         if remaining_minutes < 0:
-            hours = -hours
+            sign = '-'
+        else:
+            sign = ''
 
         if minutes < 10:
             minutes = f'0{minutes}'
@@ -59,13 +63,15 @@ class MainWindow(QMainWindow):
             minutes_per_day = 0
 
         if remaining_minutes_per_day < 0:
-            hours_per_day = -hours_per_day
+            day_sign = '-'
+        else:
+            day_sign = ''
 
         if minutes_per_day < 10:
             minutes_per_day = f'0{minutes_per_day}'
 
-        self.ui.time_left_label.setText(f'Time left this week: {hours}:{minutes}')
-        self.ui.time_left_per_day_label.setText(f'Time left per remaining weekday: {hours_per_day}:{minutes_per_day}')
+        self.ui.time_left_label.setText(f'Time left this week: {sign}{hours}:{minutes}')
+        self.ui.time_left_per_day_label.setText(f'Time left per remaining weekday: {day_sign}{hours_per_day}:{minutes_per_day}')
 
     def get_minutes(self, time):
         t1 = datetime.datetime.strptime(time, '%H:%M')
